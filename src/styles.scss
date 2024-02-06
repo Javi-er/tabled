@@ -1,0 +1,188 @@
+// Styles specific for the component, not including theming.
+
+:root {
+    // This is the width for most columns.
+    --table-column-min-width: 163px; // per Figma.
+    // If the cell height surpasses the threshold, the width is changed to this
+    // larger size. (using JS)
+    --table-column-min-width-large: 300px;
+    --table-column-min-width-small: 80px;
+    --v-space-2xs: 2rem;
+    --v-space-s: 3rem;
+    --color-white: #FFFFFF;
+    --color-150: #e5e6e6;
+    --border-dark: #262828;
+  }
+  
+  .tabled--container {
+    position: relative;
+    padding-top: var(--v-space-s);
+    overflow: hidden;
+  
+    &:before,
+    &:after {
+      content: "";
+      position: absolute;
+      top: var(--v-space-s);;
+      width: 10%;
+      height: 100%;
+      background: transparent;
+      z-index: 1;
+      will-change: opacity, z-index;
+      transition: opacity .4s, z-index .4s;
+      opacity: 0;
+      pointer-events: none;
+    }
+  
+    &:before {
+      left: 0;
+      background: linear-gradient(90deg, rgba(7, 23, 46, 0.1),rgba(0, 0, 0, 0))
+    }
+  
+    &:after {
+      right: 0;
+      background: linear-gradient(-90deg, rgba(7, 23, 46, 0.1),rgba(0, 0, 0, 0))
+    }
+  
+    .tabled--previous,
+    .tabled--next {
+      display: none;
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: var(--v-space-2xs);
+      height: var(--v-space-2xs);
+      background: var(--color-white);
+      border: 1px solid var(--border-dark);
+      padding: 0;
+      margin: 0;
+      line-height: 100%;
+      transition: border .3s ease-in;
+      outline-offset: -3px;
+  
+      &:before {
+        transition: border .3s ease-in;
+      }
+  
+      &:disabled {
+        border: 1px solid var(--color-150);
+      }
+    }
+  
+    &.tabled--fade-left,
+    &.tabled--fade-right {
+      .tabled--previous,
+      .tabled--next {
+        display: block;
+      }
+  
+       .tabled--wrapper {
+        overflow-x: scroll;
+        overflow-y: visible;
+      }
+    }
+  
+    .tabled--previous {
+      @include icon('icon-arrow-left-gold-medium');
+      right: 36px;
+  
+      &:disabled {
+        @include icon('icon-arrow-left-small');
+      }
+    }
+  
+    .tabled--next {
+      @include icon('icon-arrow-right-gold-medium');
+  
+      &:disabled {
+        @include icon('icon-arrow-right-small');
+      }
+    }
+  
+    &.tabled--fade-left {
+  
+      &:before {
+        opacity: 1;
+        z-index: 3;
+      }
+    }
+  
+    &.tabled--fade-right {
+  
+      &:after {
+        opacity: 1;
+        z-index: 3;
+      }
+    }
+  }
+  
+  table.tabled {
+    height: auto;
+    width: auto;
+    min-width: 100%;
+    margin: 0;
+    border-spacing: 0;
+  
+    position: relative;
+    table-layout: fixed;
+  
+    caption {
+      caption-side: bottom;
+    }
+  
+    th {
+      text-transform: capitalize;
+    }
+  
+    th,
+    td {
+      min-width: var(--table-column-min-width);
+    }
+  
+    .tabled__column--large {
+      min-width: var(--table-column-min-width-large);
+    }
+  
+    .tabled__column--small {
+      min-width: var(--table-column-min-width-small);
+    }
+  }
+  
+  // Stacked CSS version, used as a fallback.
+  .tabled--stacked {
+    th,
+    td {
+      display: flex;
+      flex-flow: column wrap;
+  
+      @include media(">=lg") {
+        display: table-cell;
+  
+      }
+  
+      &:before {
+        @include info-lg-heavy;
+        display: block;
+        content: attr(data-label)':';
+  
+        @include media(">=lg") {
+          display: none;
+        }
+      }
+    }
+  
+    tr {
+  
+      @include media(">=lg") {
+        display: table-row;
+      }
+    }
+  
+    thead th {
+      @include media("<lg") {
+        @include visually-hidden;
+        padding: 0;
+      }
+    }
+  }
+  
