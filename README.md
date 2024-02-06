@@ -1,5 +1,5 @@
 # Tabled
-An HTML table plugin designed to enhance the usability and responsiveness of tables on web pages.
+An HTML table plugin designed to enhance the usability and responsiveness of tables on web pages on an accesible way.
 
 Tabled is an HTML table plugin crafted to make your tables more user-friendly and adaptable on different viewport widths. It's designed to seamlessly integrate into your projects, transforming static tables into responsive ones that work beautifully across different devices. Tabled doesn't aim to be flashy; it just wants to help you present your data in the best possible way without fuss.
 
