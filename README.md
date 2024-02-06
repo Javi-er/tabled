@@ -25,7 +25,7 @@ Tabled is licensed under the GPL (GNU General Public License), which means it's 
 
 ## Examples
 
-*Calling tabled from a Drupal JS file*
+**Calling tabled from a Drupal JS file**
 
 This will render every table using Tabled, exept by those specifically defined as "stacked" and also excluding layout builder tables.
 
