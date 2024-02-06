@@ -23,4 +23,35 @@ Questions or feedback about Tabled? Feel free to reach out to us via the issue t
 ## License
 Tabled is licensed under the GPL (GNU General Public License), which means it's open-source and free to use, modify, and distribute for both personal and commercial projects.
 
+## Examples
 
+*Calling tabled from a Drupal JS file*
+
+This will render every table using Tabled, exept by those specifically defined as "stacked" and also excluding layout builder tables.
+
+```
+((Drupal, once) => {
+  /**
+   * Initialize the behavior.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attach context and settings for the plugin.
+   */
+  Drupal.behaviors.tabled = {
+    tableCount: 0,
+    attach: function (context) {
+      let index = Drupal.behaviors.tabled.tableCount;
+      const tables = once('tabled',
+      'table:not(.tabled--stacked):not([data-drupal-selector="edit-settings-selection-table"])'
+      , context);
+      const options = { failClass: 'table--stacked' };
+      tables.forEach((table) => {
+      	new Tabled(table, index++, options);
+      });
+      Drupal.behaviors.tabled.tableCount = index;
+    },
+  };
+})(Drupal, once);
+```
