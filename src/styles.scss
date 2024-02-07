@@ -14,6 +14,10 @@
     --border-dark: #262828;
   }
 
+  .wrapper {
+    max-width: 300px;
+  }
+
   .tabled--container {
     position: relative;
     padding-top: var(--v-space-s);

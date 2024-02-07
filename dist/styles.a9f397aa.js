@@ -117,247 +117,62 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"../src/tabled.ts":[function(require,module,exports) {
-"use strict";
-
-var Tabled = /** @class */function () {
-  /**
-   * Augment the table if it meets the necessary requirements.
-   *
-   * @param {Element} table
-   */
-  function Tabled(table, index, options) {
-    var _this = this;
-    if (this.checkConditions(table)) {
-      // Set up attributes
-      table.classList.add('tabled');
-      // Add the wrapper
-      this.wrap(table);
-      var wrapper = this.getWrapper(table);
-      wrapper.setAttribute('id', 'tabled-n' + index);
-      // Identify and adjust columns that could need a large width
-      this.adjustColumnsWidth(table);
-      // Add navigation controls.
-      this.addTableControls(table);
-      // Identify and set the initial state for the tables
-      this.applyFade(table);
-      // On table scrolling, add or remove the left / right fading
-      wrapper.addEventListener('scroll', function (e) {
-        _this.applyFade(table);
-      });
-      // Initialize a resize observer for changing the table status
-      new ResizeObserver(function () {
-        _this.applyFade(table);
-      }).observe(wrapper);
-    } else if (options.failClass) {
-      table.classList.add(options.failClass);
+})({"../../../.nvm/versions/node/v20.11.0/lib/node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
+var bundleURL = null;
+function getBundleURLCached() {
+  if (!bundleURL) {
+    bundleURL = getBundleURL();
+  }
+  return bundleURL;
+}
+function getBundleURL() {
+  // Attempt to find the URL of the current script and use that as the base URL
+  try {
+    throw new Error();
+  } catch (err) {
+    var matches = ('' + err.stack).match(/(https?|file|ftp|chrome-extension|moz-extension):\/\/[^)\n]+/g);
+    if (matches) {
+      return getBaseURL(matches[0]);
     }
   }
-  /**
-   *  Returns the wrapper of the table.
-   *
-   * @param {HTMLTableElement} table
-   * @returns HTMLDivElement
-   */
-  Tabled.prototype.getWrapper = function (table) {
-    return table.parentNode;
+  return '/';
+}
+function getBaseURL(url) {
+  return ('' + url).replace(/^((?:https?|file|ftp|chrome-extension|moz-extension):\/\/.+)?\/[^/]+(?:\?.*)?$/, '$1') + '/';
+}
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+},{}],"../../../.nvm/versions/node/v20.11.0/lib/node_modules/parcel-bundler/src/builtins/css-loader.js":[function(require,module,exports) {
+var bundle = require('./bundle-url');
+function updateLink(link) {
+  var newLink = link.cloneNode();
+  newLink.onload = function () {
+    link.remove();
   };
-  /**
-   *  Returns the container of the table.
-   *
-   * @param {HTMLTableElement} table
-   * @returns HTMLDivElement
-   */
-  Tabled.prototype.getContainer = function (table) {
-    return table.parentNode.parentNode;
-  };
-  /**
-   * Adjust column widths for cells that can have plenty of content by looking
-   * at the cell height.
-   *
-   * @param {HTMLTableElement} table
-   * @param {Integer} characterThreshold
-   * @param {String} columnWidthLarge
-   */
-  Tabled.prototype.adjustColumnsWidth = function (table, characterThresholdLarge, characterThresholdSmall, columnLarge, columnSmall) {
-    if (characterThresholdLarge === void 0) {
-      characterThresholdLarge = 50;
-    }
-    if (characterThresholdSmall === void 0) {
-      characterThresholdSmall = 8;
-    }
-    if (columnLarge === void 0) {
-      columnLarge = "tabled__column--large";
-    }
-    if (columnSmall === void 0) {
-      columnSmall = "tabled__column--small";
-    }
-    for (var _i = 0, _a = table.rows; _i < _a.length; _i++) {
-      var row = _a[_i];
-      Array.from(row.cells).forEach(function (cell, index) {
-        // Check if there are cells that are taller than the threshold
-        if (cell.innerText.length > characterThresholdLarge) {
-          cell.classList.add(columnLarge);
-        } else if (cell.innerText.length <= characterThresholdSmall) {
-          cell.classList.add(columnSmall);
-        }
-      });
-    }
-  };
-  /**
-   * Wraps an element with another.
-   *
-   * @param {HTMLTableElement} table
-   */
-  Tabled.prototype.wrap = function (table) {
-    // Wrap the table in the scrollable div
-    var wrapper = document.createElement('div');
-    wrapper.classList.add('tabled--wrapper');
-    wrapper.setAttribute('tabindex', '0');
-    table.parentNode.insertBefore(wrapper, table);
-    wrapper.appendChild(table);
-    // Wrap in another div for containing navigation and fading.
-    var container = document.createElement('div');
-    container.classList.add('tabled--container');
-    wrapper.parentNode.insertBefore(container, wrapper);
-    container.appendChild(wrapper);
-  };
-  /**
-  * Applies a fading effect on the edges according to the scrollbar position.
-  *
-  * @param {HTMLTableElement} table
-  */
-  Tabled.prototype.applyFade = function (table) {
-    var wrapper = this.getWrapper(table),
-      container = wrapper.parentNode;
-    // Left fading
-    if (wrapper.scrollLeft > 1) {
-      container.classList.add('tabled--fade-left');
-      container.querySelector('.tabled--previous').removeAttribute('disabled');
-    } else {
-      container.classList.remove('tabled--fade-left');
-      container.querySelector('.tabled--previous').setAttribute('disabled', 'disabled');
-    }
-    // Right fading
-    var width = wrapper.offsetWidth,
-      scrollWidth = wrapper.scrollWidth;
-    // If there is less than a pixel of difference between the table
-    if (scrollWidth - wrapper.scrollLeft - width < 1) {
-      container.classList.remove('tabled--fade-right');
-      container.querySelector('.tabled--next').setAttribute('disabled', 'disabled');
-    } else {
-      container.classList.add('tabled--fade-right');
-      container.querySelector('.tabled--next').removeAttribute('disabled');
-    }
-  };
-  /**
-   * Scroll the table in the specified direction.
-   *
-   * @param {HTMLTableElement} table
-   * @param {string} direction ["previous", "next"]
-   */
-  Tabled.prototype.move = function (table, direction) {
-    if (direction === void 0) {
-      direction = "previous";
-    }
-    var wrapper = this.getWrapper(table);
-    // Get the container's left position
-    var containerLeft = wrapper.parentNode.getBoundingClientRect().left;
-    // The first row defines the columns, but in the case that the first row
-    // has only one column, use the second row instead.
-    var columns = table.rows[0].cells > 1 ? table.rows[0].cells : table.rows[1].cells;
-    var currentLeft = 0;
-    var scrollToPosition = 0;
-    // Loop through all the columns in the table and find the next or prev
-    // column based on the position of each columns in the container.
-    if (direction == "next") {
-      for (var i = 0; i < columns.length; i++) {
-        var columnLeft = columns[i].getBoundingClientRect().left;
-        currentLeft = columnLeft - containerLeft;
-        if (currentLeft > 1) {
-          scrollToPosition = columns[i].offsetLeft;
-          break;
-        }
-      }
-    } else if (direction == "previous") {
-      for (var i = columns.length - 1; i > 0; i--) {
-        // Get the left position of each column
-        var columnLeft = columns[i].getBoundingClientRect().left;
-        currentLeft = columnLeft - containerLeft;
-        if (currentLeft <= 0) {
-          scrollToPosition = columns[i].offsetLeft;
-          break;
-        }
+  newLink.href = link.href.split('?')[0] + '?' + Date.now();
+  link.parentNode.insertBefore(newLink, link.nextSibling);
+}
+var cssTimeout = null;
+function reloadCSS() {
+  if (cssTimeout) {
+    return;
+  }
+  cssTimeout = setTimeout(function () {
+    var links = document.querySelectorAll('link[rel="stylesheet"]');
+    for (var i = 0; i < links.length; i++) {
+      if (bundle.getBaseURL(links[i].href) === bundle.getBundleURL()) {
+        updateLink(links[i]);
       }
     }
-    // Scroll to the identified position
-    wrapper.scrollTo({
-      left: scrollToPosition,
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
-  /**
-   * Creates and attaches the table navigation.
-   *
-   * @param {HTMLTableElement} table
-   */
-  Tabled.prototype.addTableControls = function (table) {
-    var _this = this;
-    // Set up the navigation.
-    ['next', 'previous'].forEach(function (direction) {
-      var button = document.createElement('button');
-      button.classList.add('tabled--' + direction);
-      button.setAttribute("aria-label", direction + " table column");
-      button.setAttribute("aria-controls", _this.getWrapper(table).getAttribute('id'));
-      button.setAttribute("disabled", "disabled");
-      button.setAttribute("type", "button");
-      button.addEventListener('click', function (e) {
-        _this.move(table, direction);
-      });
-      _this.getContainer(table).prepend(button);
-    });
-    // Tweak the caption.
-    var caption = table.querySelector('caption');
-    if (caption) {
-      caption.classList.add('visually-hidden');
-      var captionDiv = document.createElement('div');
-      captionDiv.classList.add('table-caption');
-      captionDiv.innerHTML = caption.innerText;
-      captionDiv.setAttribute('aria-hidden', true);
-      this.getContainer(table).appendChild(captionDiv);
-    }
-  };
-  /**
-   * Validates if a table meets the necessary conditions for this plugin.
-   *
-   * @param {HTMLTableElement} table
-   * @returns boolean
-   */
-  Tabled.prototype.checkConditions = function (table) {
-    var pass = true;
-    // Don't initialize under the following conditions.
-    // If a table has another table inside.
-    if (table.querySelector('table')) {
-      pass = false;
-    }
-    ;
-    // If a table is contained in another table.
-    var result = document.evaluate("ancestor::table", table, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (result) {
-      pass = false;
-    }
-    ;
-    // If the table doesn't have a tbody element as a direct descendant.
-    if (!table.querySelector('table > tbody')) {
-      pass = false;
-    }
-    ;
-    return pass;
-  };
-  return Tabled;
-}();
-},{}],"../../../.nvm/versions/node/v20.11.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+    cssTimeout = null;
+  }, 50);
+}
+module.exports = reloadCSS;
+},{"./bundle-url":"../../../.nvm/versions/node/v20.11.0/lib/node_modules/parcel-bundler/src/builtins/bundle-url.js"}],"../src/styles.scss":[function(require,module,exports) {
+var reloadCSS = require('_css_loader');
+module.hot.dispose(reloadCSS);
+module.hot.accept(reloadCSS);
+},{"_css_loader":"../../../.nvm/versions/node/v20.11.0/lib/node_modules/parcel-bundler/src/builtins/css-loader.js"}],"../../../.nvm/versions/node/v20.11.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -526,5 +341,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../../.nvm/versions/node/v20.11.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","../src/tabled.ts"], null)
-//# sourceMappingURL=/tabled.da23628a.js.map
+},{}]},{},["../../../.nvm/versions/node/v20.11.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js"], null)
+//# sourceMappingURL=/styles.a9f397aa.js.map
