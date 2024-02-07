@@ -24,16 +24,16 @@ class Tabled {
       this.addTableControls(table);
 
       // Identify and set the initial state for the tables
-      this.applyFade(table, wrapper);
+      this.applyFade(table);
 
       // On table scrolling, add or remove the left / right fading
       wrapper.addEventListener('scroll', (e) => {
-        this.applyFade(table, wrapper);
+        this.applyFade(table);
       });
 
       // Initialize a resize observer for changing the table status
       new ResizeObserver(() => {
-        this.applyFade(table, wrapper);
+        this.applyFade(table);
       }).observe(wrapper);
 
     } else if (options.failClass) {
