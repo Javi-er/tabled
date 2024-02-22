@@ -1,13 +1,24 @@
-"use strict";
 
+interface TabledOptions {
+  failClass?: string;
+}
+
+/**
+ * Represents a Tabled instance that augments a table with additional functionality.
+ */
 class Tabled {
+
+  /**
+   * The HTML table element.
+   */
+  //private table: HTMLTableElement;
 
   /**
    * Augment the table if it meets the necessary requirements.
    *
-   * @param {Element} table
+   * @param {HTMLTableElement} table
    */
-  constructor(table, index, options) {
+  constructor(table: HTMLTableElement, index: number, options: TabledOptions) {
     if (this.checkConditions(table)) {
       // Set up attributes
       table.classList.add('tabled');
@@ -27,7 +38,7 @@ class Tabled {
       this.applyFade(table);
 
       // On table scrolling, add or remove the left / right fading
-      wrapper.addEventListener('scroll', (e) => {
+      wrapper.addEventListener('scroll', () => {
         this.applyFade(table);
       });
 
@@ -47,8 +58,8 @@ class Tabled {
    * @param {HTMLTableElement} table
    * @returns HTMLDivElement
    */
-  getWrapper(table) {
-    return table.parentNode;
+  private getWrapper(table: HTMLTableElement): HTMLDivElement {
+    return table.parentNode as HTMLDivElement;
   }
 
   /**
@@ -57,8 +68,8 @@ class Tabled {
    * @param {HTMLTableElement} table
    * @returns HTMLDivElement
    */
-  getContainer(table) {
-    return table.parentNode.parentNode;
+  private getContainer(table: HTMLTableElement): HTMLDivElement | null {
+    return table.parentNode ? table.parentNode.parentNode as HTMLDivElement : null;
   }
 
   /**
@@ -66,18 +77,20 @@ class Tabled {
    * at the cell height.
    *
    * @param {HTMLTableElement} table
-   * @param {Integer} characterThreshold
-   * @param {String} columnWidthLarge
+   * @param {number} characterThresholdLarge
+   * @param {number} characterThresholdSmall
+   * @param {string} columnLarge
+   * @param {string} columnSmall
    */
-  adjustColumnsWidth(
-    table,
+  private adjustColumnsWidth(
+    table: HTMLTableElement,
     characterThresholdLarge = 50,
     characterThresholdSmall = 8,
     columnLarge = "tabled__column--large",
     columnSmall = "tabled__column--small"
   ) {
     for (let row of table.rows) {
-      Array.from(row.cells).forEach((cell, index) => {
+      Array.from(row.cells).forEach((cell) => {
         // Check if there are cells that are taller than the threshold
         if (cell.innerText.length > characterThresholdLarge) {
           cell.classList.add(columnLarge);
@@ -93,18 +106,18 @@ class Tabled {
    *
    * @param {HTMLTableElement} table
    */
-  wrap(table) {
+  private wrap(table: HTMLTableElement) {
     // Wrap the table in the scrollable div
     const wrapper = document.createElement('div');
     wrapper.classList.add('tabled--wrapper');
     wrapper.setAttribute('tabindex', '0');
-    table.parentNode.insertBefore(wrapper, table);
+    table.parentNode!.insertBefore(wrapper, table);
     wrapper.appendChild(table);
 
     // Wrap in another div for containing navigation and fading.
     const container = document.createElement('div');
     container.classList.add('tabled--container');
-    wrapper.parentNode.insertBefore(container, wrapper);
+    wrapper.parentNode!.insertBefore(container, wrapper);
     container.appendChild(wrapper);
   }
 
@@ -113,17 +126,17 @@ class Tabled {
   *
   * @param {HTMLTableElement} table
   */
-  applyFade(table) {
+  private applyFade(table: HTMLTableElement) {
     const wrapper = this.getWrapper(table),
-      container = wrapper.parentNode;
+      container = wrapper.parentNode as HTMLDivElement;
 
     // Left fading
     if (wrapper.scrollLeft > 1) {
       container.classList.add('tabled--fade-left');
-      container.querySelector('.tabled--previous').removeAttribute('disabled');
+      container.querySelector('.tabled--previous')!.removeAttribute('disabled');
     } else {
       container.classList.remove('tabled--fade-left');
-      container.querySelector('.tabled--previous').setAttribute('disabled', 'disabled');
+      container.querySelector('.tabled--previous')!.setAttribute('disabled', 'disabled');
     }
 
     // Right fading
@@ -132,10 +145,10 @@ class Tabled {
     // If there is less than a pixel of difference between the table
     if (scrollWidth - wrapper.scrollLeft - width < 1) {
       container.classList.remove('tabled--fade-right');
-      container.querySelector('.tabled--next').setAttribute('disabled', 'disabled');
+      container.querySelector('.tabled--next')!.setAttribute('disabled', 'disabled');
     } else {
       container.classList.add('tabled--fade-right');
-      container.querySelector('.tabled--next').removeAttribute('disabled');
+      container.querySelector('.tabled--next')!.removeAttribute('disabled');
     }
   }
 
@@ -145,14 +158,14 @@ class Tabled {
    * @param {HTMLTableElement} table
    * @param {string} direction ["previous", "next"]
    */
-  move(table, direction = "previous") {
+  private move(table: HTMLTableElement, direction = "previous") {
     const wrapper = this.getWrapper(table);
 
     // Get the container's left position
-    const containerLeft = wrapper.parentNode.getBoundingClientRect().left;
+    const containerLeft = (wrapper.parentNode as HTMLElement)?.getBoundingClientRect().left ?? 0;
     // The first row defines the columns, but in the case that the first row
     // has only one column, use the second row instead.
-    const columns = table.rows[0].cells > 1 ? table.rows[0].cells : table.rows[1].cells;
+    const columns = table.rows[0].cells.length > 1 ? table.rows[0].cells : table.rows[1].cells;
     let currentLeft = 0;
     let scrollToPosition = 0;
 
@@ -194,19 +207,22 @@ class Tabled {
    *
    * @param {HTMLTableElement} table
    */
-  addTableControls(table) {
+  private addTableControls(table: HTMLTableElement) {
     // Set up the navigation.
     ['next', 'previous'].forEach((direction) => {
       let button = document.createElement('button');
       button.classList.add('tabled--' + direction);
       button.setAttribute("aria-label", direction + " table column");
-      button.setAttribute("aria-controls", this.getWrapper(table).getAttribute('id'));
+      button.setAttribute("aria-controls", this.getWrapper(table).getAttribute('id')!);
       button.setAttribute("disabled", "disabled");
       button.setAttribute("type", "button");
-      button.addEventListener('click', (e) => {
+      button.addEventListener('click', () => {
         this.move(table, direction);
       });
-      this.getContainer(table).prepend(button);
+      const container = this.getContainer(table);
+      if (container) {
+        container.prepend(button);
+      }
     });
 
     // Tweak the caption.
@@ -217,8 +233,11 @@ class Tabled {
       const captionDiv = document.createElement('div');
       captionDiv.classList.add('table-caption');
       captionDiv.innerHTML = caption.innerText;
-      captionDiv.setAttribute('aria-hidden', true);
-      this.getContainer(table).appendChild(captionDiv);
+      captionDiv.setAttribute('aria-hidden', 'true');
+      const container = this.getContainer(table);
+      if (container) {
+        container.appendChild(captionDiv);
+      }
     }
   }
 
@@ -228,8 +247,8 @@ class Tabled {
    * @param {HTMLTableElement} table
    * @returns boolean
    */
-  checkConditions(table) {
-    let pass = true;
+  private checkConditions(table: HTMLTableElement): boolean {
+    let pass: boolean = true;
 
     // Don't initialize under the following conditions.
     // If a table has another table inside.
