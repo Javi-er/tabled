@@ -1,23 +1,26 @@
 "use strict";
 class Tabled {
-    constructor(table, index, options) {
-        if (this.checkConditions(table)) {
-            table.classList.add('tabled');
-            this.wrap(table);
-            const wrapper = this.getWrapper(table);
-            wrapper.setAttribute('id', 'tabled-n' + index);
-            this.adjustColumnsWidth(table);
-            this.addTableControls(table);
-            this.applyFade(table);
+    constructor(options) {
+        if (!options.index) {
+            options.index = Math.floor(Math.random() * 100);
+        }
+        if (this.checkConditions(options.table)) {
+            options.table.classList.add('tabled');
+            this.wrap(options.table);
+            const wrapper = this.getWrapper(options.table);
+            wrapper.setAttribute('id', 'tabled-n' + options.index);
+            this.adjustColumnsWidth(options.table);
+            this.addTableControls(options.table);
+            this.applyFade(options.table);
             wrapper.addEventListener('scroll', () => {
-                this.applyFade(table);
+                this.applyFade(options.table);
             });
             new ResizeObserver(() => {
-                this.applyFade(table);
+                this.applyFade(options.table);
             }).observe(wrapper);
         }
-        else if (options.failClass) {
-            table.classList.add(options.failClass);
+        else if (options.fail_class) {
+            options.table.classList.add(options.fail_class);
         }
     }
     getWrapper(table) {
@@ -69,7 +72,7 @@ class Tabled {
             container.querySelector('.tabled--next').removeAttribute('disabled');
         }
     }
-    move(table, direction = "previous") {
+    move(table, direction = 'previous') {
         var _a, _b;
         const wrapper = this.getWrapper(table);
         const containerLeft = (_b = (_a = wrapper.parentNode) === null || _a === void 0 ? void 0 : _a.getBoundingClientRect().left) !== null && _b !== void 0 ? _b : 0;
@@ -78,7 +81,7 @@ class Tabled {
         let scrollToPosition = 0;
         if (direction == "next") {
             for (let i = 0; i < columns.length; i++) {
-                let columnLeft = columns[i].getBoundingClientRect().left;
+                let columnLeft = columns[i].getClientRects()[0].left;
                 currentLeft = columnLeft - containerLeft;
                 if (currentLeft > 1) {
                     scrollToPosition = columns[i].offsetLeft;
@@ -88,9 +91,10 @@ class Tabled {
         }
         else if (direction == "previous") {
             for (let i = columns.length - 1; i > 0; i--) {
-                let columnLeft = columns[i].getBoundingClientRect().left;
+                let columnLeft = columns[i].getClientRects()[0].left;
                 currentLeft = columnLeft - containerLeft;
-                if (currentLeft <= 0) {
+                console.log(currentLeft);
+                if (currentLeft < 0) {
                     scrollToPosition = columns[i].offsetLeft;
                     break;
                 }

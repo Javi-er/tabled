@@ -1,6 +1,8 @@
 
 interface TabledOptions {
-  failClass?: string;
+  table: HTMLTableElement;
+  fail_class?: string;
+  index?: number;
 }
 
 /**
@@ -10,45 +12,46 @@ class Tabled {
 
   /**
    * The HTML table element.
-   */
-  //private table: HTMLTableElement;
-
-  /**
    * Augment the table if it meets the necessary requirements.
-   *
-   * @param {HTMLTableElement} table
+   * @param {TabledOptions} options
    */
-  constructor(table: HTMLTableElement, index: number, options: TabledOptions) {
-    if (this.checkConditions(table)) {
+  constructor(options: TabledOptions) {
+
+    // If there is not an index, generate a random one.
+    if (!options.index) {
+      options.index = Math.floor(Math.random() * 10000);
+    }
+
+    if (this.checkConditions(options.table)) {
       // Set up attributes
-      table.classList.add('tabled');
+      options.table.classList.add('tabled');
 
       // Add the wrapper
-      this.wrap(table);
-      const wrapper = this.getWrapper(table);
-      wrapper.setAttribute('id', 'tabled-n' + index);
+      this.wrap(options.table);
+      const wrapper: HTMLDivElement = this.getWrapper(options.table);
+      wrapper.setAttribute('id', 'tabled-n' + options.index);
 
       // Identify and adjust columns that could need a large width
-      this.adjustColumnsWidth(table);
+      this.adjustColumnsWidth(options.table);
 
       // Add navigation controls.
-      this.addTableControls(table);
+      this.addTableControls(options.table);
 
       // Identify and set the initial state for the tables
-      this.applyFade(table);
+      this.applyFade(options.table);
 
       // On table scrolling, add or remove the left / right fading
       wrapper.addEventListener('scroll', () => {
-        this.applyFade(table);
+        this.applyFade(options.table);
       });
 
       // Initialize a resize observer for changing the table status
       new ResizeObserver(() => {
-        this.applyFade(table);
+        this.applyFade(options.table);
       }).observe(wrapper);
 
-    } else if (options.failClass) {
-      table.classList.add(options.failClass);
+    } else if (options.fail_class) {
+      options.table.classList.add(options.fail_class);
     }
   }
 
@@ -84,10 +87,10 @@ class Tabled {
    */
   private adjustColumnsWidth(
     table: HTMLTableElement,
-    characterThresholdLarge = 50,
-    characterThresholdSmall = 8,
-    columnLarge = "tabled__column--large",
-    columnSmall = "tabled__column--small"
+    characterThresholdLarge: number = 50,
+    characterThresholdSmall: number = 8,
+    columnLarge: string = "tabled__column--large",
+    columnSmall: string = "tabled__column--small"
   ) {
     for (let row of table.rows) {
       Array.from(row.cells).forEach((cell) => {
@@ -108,14 +111,14 @@ class Tabled {
    */
   private wrap(table: HTMLTableElement) {
     // Wrap the table in the scrollable div
-    const wrapper = document.createElement('div');
+    const wrapper: HTMLDivElement = document.createElement('div');
     wrapper.classList.add('tabled--wrapper');
     wrapper.setAttribute('tabindex', '0');
     table.parentNode!.insertBefore(wrapper, table);
     wrapper.appendChild(table);
 
     // Wrap in another div for containing navigation and fading.
-    const container = document.createElement('div');
+    const container: HTMLDivElement = document.createElement('div');
     container.classList.add('tabled--container');
     wrapper.parentNode!.insertBefore(container, wrapper);
     container.appendChild(wrapper);
@@ -127,7 +130,7 @@ class Tabled {
   * @param {HTMLTableElement} table
   */
   private applyFade(table: HTMLTableElement) {
-    const wrapper = this.getWrapper(table),
+    const wrapper: HTMLDivElement = this.getWrapper(table),
       container = wrapper.parentNode as HTMLDivElement;
 
     // Left fading
@@ -140,8 +143,8 @@ class Tabled {
     }
 
     // Right fading
-    const width = wrapper.offsetWidth,
-      scrollWidth = wrapper.scrollWidth;
+    const width: number = wrapper.offsetWidth,
+      scrollWidth: number = wrapper.scrollWidth;
     // If there is less than a pixel of difference between the table
     if (scrollWidth - wrapper.scrollLeft - width < 1) {
       container.classList.remove('tabled--fade-right');
@@ -158,22 +161,22 @@ class Tabled {
    * @param {HTMLTableElement} table
    * @param {string} direction ["previous", "next"]
    */
-  private move(table: HTMLTableElement, direction = "previous") {
-    const wrapper = this.getWrapper(table);
+  private move(table: HTMLTableElement, direction: string = 'previous') {
+    const wrapper: HTMLDivElement = this.getWrapper(table);
 
     // Get the container's left position
-    const containerLeft = (wrapper.parentNode as HTMLElement)?.getBoundingClientRect().left ?? 0;
+    const containerLeft: number = (wrapper.parentNode as HTMLElement)?.getBoundingClientRect().left ?? 0;
     // The first row defines the columns, but in the case that the first row
     // has only one column, use the second row instead.
     const columns = table.rows[0].cells.length > 1 ? table.rows[0].cells : table.rows[1].cells;
-    let currentLeft = 0;
-    let scrollToPosition = 0;
+    let currentLeft: number = 0;
+    let scrollToPosition: number = 0;
 
     // Loop through all the columns in the table and find the next or prev
     // column based on the position of each columns in the container.
     if (direction == "next") {
       for (let i = 0; i < columns.length; i++) {
-        let columnLeft = columns[i].getBoundingClientRect().left;
+        let columnLeft = columns[i].getClientRects()[0].left;
         currentLeft = columnLeft - containerLeft;
         if (currentLeft > 1) {
           scrollToPosition = columns[i].offsetLeft;
@@ -183,10 +186,12 @@ class Tabled {
     } else if (direction == "previous") {
       for (let i = columns.length - 1; i > 0; i--) {
         // Get the left position of each column
-        let columnLeft = columns[i].getBoundingClientRect().left;
+        let columnLeft: number = columns[i].getClientRects()[0].left;
         currentLeft = columnLeft - containerLeft;
-
-        if (currentLeft <= 0) {
+        //console.log(i);
+        //console.log(columns.length);
+        console.log(currentLeft);
+        if (currentLeft < 0) { //console.log(columns[i]);
           scrollToPosition = columns[i].offsetLeft;
           break;
         }
@@ -210,7 +215,7 @@ class Tabled {
   private addTableControls(table: HTMLTableElement) {
     // Set up the navigation.
     ['next', 'previous'].forEach((direction) => {
-      let button = document.createElement('button');
+      let button: HTMLButtonElement = document.createElement('button');
       button.classList.add('tabled--' + direction);
       button.setAttribute("aria-label", direction + " table column");
       button.setAttribute("aria-controls", this.getWrapper(table).getAttribute('id')!);
@@ -219,14 +224,14 @@ class Tabled {
       button.addEventListener('click', () => {
         this.move(table, direction);
       });
-      const container = this.getContainer(table);
+      const container: HTMLDivElement | null = this.getContainer(table);
       if (container) {
         container.prepend(button);
       }
     });
 
     // Tweak the caption.
-    const caption = table.querySelector('caption');
+    const caption: HTMLTableCaptionElement | null = table.querySelector('caption');
     if (caption) {
       caption.classList.add('visually-hidden');
 
