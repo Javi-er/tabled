@@ -1,10 +1,11 @@
-**Under Development** ![image](https://github.com/Javi-er/tabled/assets/141685/706a54de-5e00-49c2-9113-d6c9d729d431)
-
 
 # Tabled
 An HTML table plugin designed to enhance the usability and responsiveness of tables on web pages on an accesible way.
 
 Tabled is an HTML table plugin crafted to make your tables more user-friendly and adaptable on different viewport widths. It's designed to seamlessly integrate into your projects, transforming static tables into responsive ones that work beautifully across different devices. Tabled doesn't aim to be flashy; it just wants to help you present your data in the best possible way without fuss.
+
+## Live demo
+https://html-preview.github.io/?url=https://github.com/Javi-er/tabled/blob/main/docs/examples.html
 
 ## Features
 
