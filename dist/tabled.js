@@ -149,7 +149,6 @@ class Tabled {
         }
     }
     checkConditions(table) {
-        console.log(table);
         if (table.classList.contains(this.stackedClass)) {
             return false;
         }

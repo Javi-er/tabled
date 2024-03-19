@@ -25,8 +25,9 @@
   --tabled-color-focus: #3d8eff;
   --tabled-color-disabled: #a1a1a1;
   --tabled-color-border: var(--tabled-color-700);
-
 }
+
+$breakpoint-large: 1024px;
 
 @mixin visually-hidden {
   padding: 0;
@@ -215,27 +216,27 @@ table.tabled {
     display: flex;
     flex-flow: column wrap;
 
-    @media (min-width: 1024px) {
+    @media (min-width: $breakpoint-large) {
       display: table-cell;
     }
 
     &:before {
       display: block;
       content: attr(data-label);
-      @media (min-width: 1024px) {
+      @media (min-width: $breakpoint-large) {
         display: none;
       }
     }
   }
 
   tr {
-    @media (min-width: 1024px) {
+    @media (min-width: $breakpoint-large) {
       display: table-row;
     }
   }
 
   thead th {
-    @media (max-width: 1024px) {
+    @media (max-width: $breakpoint-large) {
       @include visually-hidden;
       padding: 0;
     }
