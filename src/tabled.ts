@@ -9,6 +9,7 @@ interface TabledOptions {
  * Represents a Tabled instance that augments a table with additional functionality.
  */
 class Tabled {
+  readonly stackedClass = 'tabled--stacked';
 
   /**
    * The HTML table element.
@@ -22,6 +23,7 @@ class Tabled {
       options.index = Math.floor(Math.random() * 10000);
     }
 
+    // Check if the table met the necessary conditions.
     if (this.checkConditions(options.table)) {
       // Set up attributes
       options.table.classList.add('tabled');
@@ -50,6 +52,23 @@ class Tabled {
         this.applyFade(options.table);
       }).observe(wrapper);
 
+    // Checks if the table should be rendered as stacked.
+    } else if (options.table.classList.contains(this.stackedClass)) {
+      // Traverse the table and apply the column headers as data-label attributes
+      const headers = Array.from(options.table.querySelectorAll('thead th'));
+      const rows = Array.from(options.table.querySelectorAll('tbody tr'));
+
+      rows.forEach((row) => {
+        const cells = Array.from(row.querySelectorAll('td, th'));
+        cells.forEach((cell, index) => {
+          const header = headers[index] as HTMLElement;
+          if (header) {
+            cell.setAttribute('data-label', header.innerText + ': ');
+          }
+        });
+      });
+
+    // Otherwise, add a class to the table to indicate that it failed to initialize.
     } else if (options.fail_class) {
       options.table.classList.add(options.fail_class);
     }
@@ -188,10 +207,8 @@ class Tabled {
         // Get the left position of each column
         let columnLeft: number = columns[i].getClientRects()[0].left;
         currentLeft = columnLeft - containerLeft;
-        //console.log(i);
-        //console.log(columns.length);
-        console.log(currentLeft);
-        if (currentLeft < 0) { //console.log(columns[i]);
+
+        if (currentLeft < 0) {
           scrollToPosition = columns[i].offsetLeft;
           break;
         }
@@ -252,20 +269,23 @@ class Tabled {
    * @param {HTMLTableElement} table
    * @returns boolean
    */
-  private checkConditions(table: HTMLTableElement): boolean {
-    let pass: boolean = true;
+  private checkConditions(table: HTMLTableElement) {
+
+    // Check if the table should be rendered as stacked
+    if (table.classList.contains(this.stackedClass)) { return false };
 
     // Don't initialize under the following conditions.
     // If a table has another table inside.
-    if (table.querySelector('table')) { pass = false };
+    if (table.querySelector('table')) { return false };
+
+    // If the table doesn't have a tbody element as a direct descendant.
+    if (!table.querySelector('table > tbody')) { return false };
 
     // If a table is contained in another table.
     const result = document.evaluate("ancestor::table", table, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (result) { pass = false };
+    if (result) { return false };
 
-    // If the table doesn't have a tbody element as a direct descendant.
-    if (!table.querySelector('table > tbody')) { pass = false };
-
-    return pass;
+    // If all pass
+    return true;
   }
 }

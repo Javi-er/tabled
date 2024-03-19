@@ -28,6 +28,7 @@ table {
   // This is the native caption element.
   caption {
     caption-side: bottom;
+    padding-block: 1rem;
   }
 
   // This is a header used on link-collection--table
@@ -125,15 +126,6 @@ table.tabled--stacked {
       }
     }
 
-    th {
-      &:first-of-type {
-        position: relative !important;
-        height: var(--tabled-v-space-3xs);
-        color: transparent;
-        overflow: hidden;
-        padding: 0;
-      }
-    }
 
     td {
       padding: 0;

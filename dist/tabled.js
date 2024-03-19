@@ -1,8 +1,9 @@
 "use strict";
 class Tabled {
     constructor(options) {
+        this.stackedClass = 'tabled--stacked';
         if (!options.index) {
-            options.index = Math.floor(Math.random() * 100);
+            options.index = Math.floor(Math.random() * 10000);
         }
         if (this.checkConditions(options.table)) {
             options.table.classList.add('tabled');
@@ -18,6 +19,19 @@ class Tabled {
             new ResizeObserver(() => {
                 this.applyFade(options.table);
             }).observe(wrapper);
+        }
+        else if (options.table.classList.contains(this.stackedClass)) {
+            const headers = Array.from(options.table.querySelectorAll('thead th'));
+            const rows = Array.from(options.table.querySelectorAll('tbody tr'));
+            rows.forEach((row) => {
+                const cells = Array.from(row.querySelectorAll('td, th'));
+                cells.forEach((cell, index) => {
+                    const header = headers[index];
+                    if (header) {
+                        cell.setAttribute('data-label', header.innerText + ': ');
+                    }
+                });
+            });
         }
         else if (options.fail_class) {
             options.table.classList.add(options.fail_class);
@@ -93,7 +107,6 @@ class Tabled {
             for (let i = columns.length - 1; i > 0; i--) {
                 let columnLeft = columns[i].getClientRects()[0].left;
                 currentLeft = columnLeft - containerLeft;
-                console.log(currentLeft);
                 if (currentLeft < 0) {
                     scrollToPosition = columns[i].offsetLeft;
                     break;
@@ -136,21 +149,25 @@ class Tabled {
         }
     }
     checkConditions(table) {
-        let pass = true;
+        console.log(table);
+        if (table.classList.contains(this.stackedClass)) {
+            return false;
+        }
+        ;
         if (table.querySelector('table')) {
-            pass = false;
+            return false;
+        }
+        ;
+        if (!table.querySelector('table > tbody')) {
+            return false;
         }
         ;
         const result = document.evaluate("ancestor::table", table, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
         if (result) {
-            pass = false;
+            return false;
         }
         ;
-        if (!table.querySelector('table > tbody')) {
-            pass = false;
-        }
-        ;
-        return pass;
+        return true;
     }
 }
 //# sourceMappingURL=tabled.js.map
