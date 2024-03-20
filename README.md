@@ -26,6 +26,8 @@ This mode will check that some requirements are met, specifically:
 
 This plugin it's meant to work with valid tables that are well formed, if a table has broken or invalid markup the results can be unstable, for these cases it's recommended to force the stacked mode instead.
 
+On this mode, special classes will be added to cells with less or more than a predefined number of characters (which can be configured) in order to make columns narrower or wider depending on it's content.
+
 The **Stacked rows** mode will not make any modifications at larger viewport widths, but it will stack the rows one on top of another under a predefined breakpoint (1024px). This mode is recommended for tables with invalid or overly complex markup.
 
 Both modes are tested and meant to work with most common tables layout and it can not work for cases where the tables are overly complex or with specific needs.
