@@ -9,6 +9,11 @@ This plugin was created in order to have a lightweight solution that tries to of
 This plugin was developed in collaboration with [@sganzer](https://github.com/sganzer), who assisted in designing the visual interface.
 
 
+https://github.com/Javi-er/tabled/assets/141685/c7aae77d-8e53-4e65-92da-03c99ddfcb8f
+
+
+
+
 ## Live demo
 https://html-preview.github.io/?url=https://github.com/Javi-er/tabled/blob/main/docs/examples.html
 
