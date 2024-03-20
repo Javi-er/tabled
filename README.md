@@ -11,7 +11,7 @@ This plugin was developed in collaboration with [@sganzer](https://github.com/sg
 
 https://github.com/Javi-er/tabled/assets/141685/c7aae77d-8e53-4e65-92da-03c99ddfcb8f
 
-
+https://github.com/Javi-er/tabled/assets/141685/1b60f8de-a8a9-47ec-a115-c2ffb467537b
 
 
 ## Live demo
