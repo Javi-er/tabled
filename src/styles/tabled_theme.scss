@@ -1,10 +1,15 @@
+
+// This is the native caption element.
+table caption,
 // .table-caption is the cloned caption element shown below the table.
-.table-caption {
-  padding-block: var(--tabled-v-space-xs);
+.tabled__caption {
+  padding-block: var(--tabled-v-space-4xs);
   border-bottom: 1px solid var(--tabled-color-150);
   background: var(--tabled-color-white);
   z-index: 4;
   position: relative;
+  font-weight: 600;
+  text-align: left;
 }
 
 table {
@@ -23,18 +28,6 @@ table {
 
   &:-webkit-scrollbar-track {
     background-color: var(--tabled-color-150);
-  }
-
-  // This is the native caption element.
-  caption {
-    caption-side: bottom;
-    padding-block: 1rem;
-  }
-
-  // This is a header used on link-collection--table
-  &__caption {
-    text-align: left;
-    margin-bottom: var(--tabled-v-space-3xs);
   }
 
   th,

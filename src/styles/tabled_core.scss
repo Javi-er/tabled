@@ -46,9 +46,9 @@ $breakpoint-large: 1024px;
   @include visually-hidden;
 }
 
-.tabled--container {
+.tabled {
   position: relative;
-  padding-top: var(--tabled-v-space-s);
+  padding-top: var(--tabled-v-space-4xs);
   overflow: hidden;
 
   &:before,
@@ -60,12 +60,11 @@ $breakpoint-large: 1024px;
     height: 100%;
     background: transparent;
     z-index: 1;
-    will-change: opacity, z-index;
-    transition:
-      opacity 0.4s,
-      z-index 0.4s;
+    will-change: opacity ;
+    transition: opacity 0.4s;
     opacity: 0;
     pointer-events: none;
+    font-weight: 600;
   }
 
   &:before {
@@ -78,11 +77,20 @@ $breakpoint-large: 1024px;
     background: linear-gradient(-90deg, rgba(7, 23, 46, 0.1), rgba(0, 0, 0, 0));
   }
 
-  .tabled--previous,
-  .tabled--next {
+  .tabled__navigation {
+    position: relative;
+    height: var(--tabled-v-space-xs);
+    width: 100%;
+    padding-block: var(--tabled-v-space-4xs);
+    background: var(--tabled-color-white);
+    z-index: 4;
+  }
+
+  .tabled__previous,
+  .tabled__next {
     display: none;
     position: absolute;
-    top: 0;
+    top: var(--tabled-v-space-4xs);
     right: 0;
     width: var(--tabled-v-space-xs);
     height: var(--tabled-v-space-xs);
@@ -119,18 +127,18 @@ $breakpoint-large: 1024px;
 
   &.tabled--fade-left,
   &.tabled--fade-right {
-    .tabled--previous,
-    .tabled--next {
+    .tabled__previous,
+    .tabled__next {
       display: block;
     }
 
-    .tabled--wrapper {
+    .tabled__wrapper {
       overflow-x: scroll;
       overflow-y: visible;
     }
   }
 
-  .tabled--previous {
+  .tabled__previous {
     right: var(--tabled-v-space-s);
 
     &:before {
@@ -147,7 +155,7 @@ $breakpoint-large: 1024px;
     }
   }
 
-  .tabled--next {
+  .tabled__next {
     &:before {
       font-family: Arial, Helvetica, sans-serif;
       display: inline-block;
@@ -177,7 +185,7 @@ $breakpoint-large: 1024px;
   }
 }
 
-table.tabled {
+table.tabled__table {
   height: auto;
   width: auto;
   min-width: 100%;
@@ -186,10 +194,6 @@ table.tabled {
 
   position: relative;
   table-layout: fixed;
-
-  caption {
-    caption-side: bottom;
-  }
 
   th {
     text-transform: capitalize;

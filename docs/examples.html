@@ -24,7 +24,7 @@
    <h1>Examples</h1>
    <h2>Table with column headers</h2>
 <table>
-  <caption>List of applicants</caption>
+  <caption>List of applicants for position</caption>
   <thead>
     <tr>
       <th>Name</th>
@@ -164,6 +164,7 @@
 </table>
 <h2>Table with row headers</h2>
 <table>
+  <caption>Dogs and owners</caption>
     <tbody>
       <tr>
         <th>&nbsp;</th>
@@ -204,7 +205,7 @@
   </table>
 <h2>Table with small columns</h2>
   <table class="wikitable">
-
+  <caption>List of days per months</caption>
     <tbody>
       <tr>
         <th><abbr title="January">Jan</abbr>
@@ -1181,7 +1182,7 @@ It will switch the table to "stacked" mode where each cell represents a row unde
       const tables = document.querySelectorAll('table');
 
       tables.forEach((table) => {
-        new Tabled({table: table,  fail_class: 'tabled--stacked'});
+        new Tabled({table: table,  failClass: 'tabled--stacked'});
       });
     })();
   </script>

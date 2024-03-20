@@ -1,23 +1,69 @@
 
+/**
+ * Represents the options for configuring a Tabled instance.
+ */
 interface TabledOptions {
+  /**
+   * The HTML table element to be augmented.
+   */
   table: HTMLTableElement;
-  fail_class?: string;
+
+  /**
+   * The CSS class to be added to the table if it fails to initialize.
+   */
+  failClass?: string;
+
+  /**
+   * The index of the table. If not provided, a random index will be generated.
+   */
   index?: number;
+
+  /**
+   * The side where the table caption should be placed. Possible values are "top" and "bottom".
+   */
+  captionSide?: "top" | "bottom";
+
+  /**
+   * The character threshold for determining if a cell should have a large width.
+   * Cells with text length greater than this threshold will have the "tabled__column--large" class added.
+   * Default value is 50.
+   */
+  characterThresholdLarge?: number;
+
+  /**
+   * The character threshold for determining if a cell should have a small width.
+   * Cells with text length less than or equal to this threshold will have the "tabled__column--small" class added.
+   * Default value is 8.
+   */
+  characterThresholdSmall?: number;
+}
+
+
+enum Selectors {
+  stacked = "tabled--stacked",
+  table = "tabled__table",
+  columnLarge = "tabled__column--large",
+  columnSmall = "tabled__column--small",
+  wrapper = "tabled__wrapper",
+  container = "tabled",
+  fadeLeft = "tabled--fade-left",
+  fadeRight = "tabled--fade-right",
+  navigation = "tabled__navigation",
+  previous = "tabled__previous",
+  next = "tabled__next",
+  caption = "tabled__caption",
 }
 
 /**
  * Represents a Tabled instance that augments a table with additional functionality.
  */
 class Tabled {
-  readonly stackedClass = 'tabled--stacked';
-
   /**
    * The HTML table element.
    * Augment the table if it meets the necessary requirements.
    * @param {TabledOptions} options
    */
   constructor(options: TabledOptions) {
-
     // If there is not an index, generate a random one.
     if (!options.index) {
       options.index = Math.floor(Math.random() * 10000);
@@ -26,24 +72,24 @@ class Tabled {
     // Check if the table met the necessary conditions.
     if (this.checkConditions(options.table)) {
       // Set up attributes
-      options.table.classList.add('tabled');
+      options.table.classList.add(Selectors.table);
 
       // Add the wrapper
       this.wrap(options.table);
       const wrapper: HTMLDivElement = this.getWrapper(options.table);
-      wrapper.setAttribute('id', 'tabled-n' + options.index);
+      wrapper.setAttribute("id", "tabled-n" + options.index);
 
       // Identify and adjust columns that could need a large width
-      this.adjustColumnsWidth(options.table);
+      this.adjustColumnsWidth(options);
 
       // Add navigation controls.
-      this.addTableControls(options.table);
+      this.addTableControls(options);
 
       // Identify and set the initial state for the tables
       this.applyFade(options.table);
 
       // On table scrolling, add or remove the left / right fading
-      wrapper.addEventListener('scroll', () => {
+      wrapper.addEventListener("scroll", () => {
         this.applyFade(options.table);
       });
 
@@ -52,25 +98,25 @@ class Tabled {
         this.applyFade(options.table);
       }).observe(wrapper);
 
-    // Checks if the table should be rendered as stacked.
-    } else if (options.table.classList.contains(this.stackedClass)) {
+      // Checks if the table should be rendered as stacked.
+    } else if (options.table.classList.contains(Selectors.stacked)) {
       // Traverse the table and apply the column headers as data-label attributes
-      const headers = Array.from(options.table.querySelectorAll('thead th'));
-      const rows = Array.from(options.table.querySelectorAll('tbody tr'));
+      const headers = Array.from(options.table.querySelectorAll("thead th"));
+      const rows = Array.from(options.table.querySelectorAll("tbody tr"));
 
       rows.forEach((row) => {
-        const cells = Array.from(row.querySelectorAll('td, th'));
+        const cells = Array.from(row.querySelectorAll("td, th"));
         cells.forEach((cell, index) => {
           const header = headers[index] as HTMLElement;
           if (header) {
-            cell.setAttribute('data-label', header.innerText + ': ');
+            cell.setAttribute("data-label", header.innerText + ": ");
           }
         });
       });
 
-    // Otherwise, add a class to the table to indicate that it failed to initialize.
-    } else if (options.fail_class) {
-      options.table.classList.add(options.fail_class);
+      // Otherwise, add a class to the table to indicate that it failed to initialize.
+    } else if (options.failClass) {
+      options.table.classList.add(options.failClass);
     }
   }
 
@@ -91,33 +137,29 @@ class Tabled {
    * @returns HTMLDivElement
    */
   private getContainer(table: HTMLTableElement): HTMLDivElement | null {
-    return table.parentNode ? table.parentNode.parentNode as HTMLDivElement : null;
+    return table.parentNode
+      ? (table.parentNode.parentNode as HTMLDivElement)
+      : null;
   }
 
   /**
    * Adjust column widths for cells that can have plenty of content by looking
    * at the cell height.
    *
-   * @param {HTMLTableElement} table
-   * @param {number} characterThresholdLarge
-   * @param {number} characterThresholdSmall
-   * @param {string} columnLarge
-   * @param {string} columnSmall
+   * @param {TabledOptions} options
    */
-  private adjustColumnsWidth(
-    table: HTMLTableElement,
-    characterThresholdLarge: number = 50,
-    characterThresholdSmall: number = 8,
-    columnLarge: string = "tabled__column--large",
-    columnSmall: string = "tabled__column--small"
-  ) {
-    for (let row of table.rows) {
+  private adjustColumnsWidth(options: TabledOptions) {
+
+    const characterThresholdLarge = options.characterThresholdLarge ?? 50;
+    const characterThresholdSmall = options.characterThresholdSmall ?? 8;
+
+    for (let row of options.table.rows) {
       Array.from(row.cells).forEach((cell) => {
         // Check if there are cells that are taller than the threshold
         if (cell.innerText.length > characterThresholdLarge) {
-          cell.classList.add(columnLarge);
+          cell.classList.add(Selectors.columnLarge);
         } else if (cell.innerText.length <= characterThresholdSmall) {
-          cell.classList.add(columnSmall);
+          cell.classList.add(Selectors.columnSmall);
         }
       });
     }
@@ -130,47 +172,54 @@ class Tabled {
    */
   private wrap(table: HTMLTableElement) {
     // Wrap the table in the scrollable div
-    const wrapper: HTMLDivElement = document.createElement('div');
-    wrapper.classList.add('tabled--wrapper');
-    wrapper.setAttribute('tabindex', '0');
+    const wrapper: HTMLDivElement = document.createElement("div");
+    wrapper.classList.add(Selectors.wrapper);
+    wrapper.setAttribute("tabindex", "0");
     table.parentNode!.insertBefore(wrapper, table);
     wrapper.appendChild(table);
 
     // Wrap in another div for containing navigation and fading.
-    const container: HTMLDivElement = document.createElement('div');
-    container.classList.add('tabled--container');
+    const container: HTMLDivElement = document.createElement("div");
+    container.classList.add(Selectors.container);
     wrapper.parentNode!.insertBefore(container, wrapper);
     container.appendChild(wrapper);
   }
 
   /**
-  * Applies a fading effect on the edges according to the scrollbar position.
-  *
-  * @param {HTMLTableElement} table
-  */
+   * Applies a fading effect on the edges according to the scrollbar position.
+   *
+   * @param {HTMLTableElement} table
+   */
   private applyFade(table: HTMLTableElement) {
     const wrapper: HTMLDivElement = this.getWrapper(table),
-      container = wrapper.parentNode as HTMLDivElement;
+      container = wrapper.parentNode as HTMLDivElement,
+      previousButton = container.getElementsByClassName(
+        Selectors.previous
+      )[0] as HTMLButtonElement,
+      nextButton = container.getElementsByClassName(
+        Selectors.next
+      )[0] as HTMLButtonElement;
 
     // Left fading
     if (wrapper.scrollLeft > 1) {
-      container.classList.add('tabled--fade-left');
-      container.querySelector('.tabled--previous')!.removeAttribute('disabled');
+      container.classList.add(Selectors.fadeLeft);
+      previousButton.removeAttribute("disabled");
     } else {
-      container.classList.remove('tabled--fade-left');
-      container.querySelector('.tabled--previous')!.setAttribute('disabled', 'disabled');
+      container.classList.remove(Selectors.fadeLeft);
+      previousButton.setAttribute("disabled", "disabled");
     }
 
     // Right fading
     const width: number = wrapper.offsetWidth,
       scrollWidth: number = wrapper.scrollWidth;
+
     // If there is less than a pixel of difference between the table
     if (scrollWidth - wrapper.scrollLeft - width < 1) {
-      container.classList.remove('tabled--fade-right');
-      container.querySelector('.tabled--next')!.setAttribute('disabled', 'disabled');
+      container.classList.remove(Selectors.fadeRight);
+      nextButton.setAttribute("disabled", "disabled");
     } else {
-      container.classList.add('tabled--fade-right');
-      container.querySelector('.tabled--next')!.removeAttribute('disabled');
+      container.classList.add(Selectors.fadeRight);
+      nextButton.removeAttribute("disabled");
     }
   }
 
@@ -180,14 +229,18 @@ class Tabled {
    * @param {HTMLTableElement} table
    * @param {string} direction ["previous", "next"]
    */
-  private move(table: HTMLTableElement, direction: string = 'previous') {
+  private move(table: HTMLTableElement, direction: string = "previous") {
     const wrapper: HTMLDivElement = this.getWrapper(table);
 
     // Get the container's left position
-    const containerLeft: number = (wrapper.parentNode as HTMLElement)?.getBoundingClientRect().left ?? 0;
+    const containerLeft: number =
+      (wrapper.parentNode as HTMLElement)?.getBoundingClientRect().left ?? 0;
     // The first row defines the columns, but in the case that the first row
     // has only one column, use the second row instead.
-    const columns = table.rows[0].cells.length > 1 ? table.rows[0].cells : table.rows[1].cells;
+    const columns =
+      table.rows[0].cells.length > 1
+        ? table.rows[0].cells
+        : table.rows[1].cells;
     let currentLeft: number = 0;
     let scrollToPosition: number = 0;
 
@@ -219,46 +272,65 @@ class Tabled {
     wrapper.scrollTo({
       left: scrollToPosition,
       top: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
-
   }
 
   /**
    * Creates and attaches the table navigation.
    *
-   * @param {HTMLTableElement} table
+   * @param {TabledOptions} options
    */
-  private addTableControls(table: HTMLTableElement) {
+  private addTableControls(options: TabledOptions) {
+    const table: HTMLTableElement = options.table;
+    const navigationContainer: HTMLDivElement = document.createElement("div");
+    navigationContainer.classList.add(Selectors.navigation);
+
     // Set up the navigation.
-    ['next', 'previous'].forEach((direction) => {
-      let button: HTMLButtonElement = document.createElement('button');
-      button.classList.add('tabled--' + direction);
+    ["next", "previous"].forEach((direction) => {
+      let button: HTMLButtonElement = document.createElement("button");
+      button.classList.add("tabled__" + direction);
       button.setAttribute("aria-label", direction + " table column");
-      button.setAttribute("aria-controls", this.getWrapper(table).getAttribute('id')!);
+      button.setAttribute(
+        "aria-controls",
+        this.getWrapper(table).getAttribute("id")!
+      );
       button.setAttribute("disabled", "disabled");
       button.setAttribute("type", "button");
-      button.addEventListener('click', () => {
+      button.addEventListener("click", () => {
         this.move(table, direction);
       });
-      const container: HTMLDivElement | null = this.getContainer(table);
-      if (container) {
-        container.prepend(button);
-      }
+
+      navigationContainer.appendChild(button);
     });
 
-    // Tweak the caption.
-    const caption: HTMLTableCaptionElement | null = table.querySelector('caption');
-    if (caption) {
-      caption.classList.add('visually-hidden');
+    const tableContainer: HTMLDivElement | null = this.getContainer(table);
+    if (tableContainer) {
+      tableContainer.prepend(navigationContainer);
+    }
 
-      const captionDiv = document.createElement('div');
-      captionDiv.classList.add('table-caption');
+    // Tweak the caption.
+    const caption: HTMLTableCaptionElement | null =
+      table.querySelector("caption");
+
+    if (caption) {
+      caption.classList.add("visually-hidden");
+
+      const captionDiv = document.createElement("div");
+      captionDiv.classList.add(Selectors.caption);
+
+      if (options.captionSide === "bottom") {
+        captionDiv.classList.add("tabled__caption--bottom");
+      }
+
       captionDiv.innerHTML = caption.innerText;
-      captionDiv.setAttribute('aria-hidden', 'true');
+      captionDiv.setAttribute("aria-hidden", "true");
       const container = this.getContainer(table);
+
       if (container) {
-        container.appendChild(captionDiv);
+        options.captionSide === "bottom"
+          ? container.appendChild(captionDiv)
+          : container.prepend(captionDiv);
       }
     }
   }
@@ -270,20 +342,34 @@ class Tabled {
    * @returns boolean
    */
   private checkConditions(table: HTMLTableElement) {
-
     // Check if the table should be rendered as stacked
-    if (table.classList.contains(this.stackedClass)) { return false };
+    if (table.classList.contains(Selectors.stacked)) {
+      return false;
+    }
 
     // Don't initialize under the following conditions.
     // If a table has another table inside.
-    if (table.querySelector('table')) { return false };
+    if (table.querySelector("table")) {
+      return false;
+    }
 
     // If the table doesn't have a tbody element as a direct descendant.
-    if (!table.querySelector('table > tbody')) { return false };
+    if (!table.querySelector("table > tbody")) {
+      return false;
+    }
 
     // If a table is contained in another table.
-    const result = document.evaluate("ancestor::table", table, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (result) { return false };
+    const result = document.evaluate(
+      "ancestor::table",
+      table,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null
+    ).singleNodeValue;
+
+    if (result) {
+      return false;
+    }
 
     // If all pass
     return true;
