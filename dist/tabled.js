@@ -144,7 +144,7 @@ class Tabled {
         const table = options.table;
         const navigationContainer = document.createElement("div");
         navigationContainer.classList.add(Selectors.navigation);
-        ["next", "previous"].forEach((direction) => {
+        ["previous", "next"].forEach((direction) => {
             let button = document.createElement("button");
             button.classList.add("tabled__" + direction);
             button.setAttribute("aria-label", direction + " table column");
