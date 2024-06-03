@@ -1,3 +1,5 @@
+# NOTE: this repository it's now hosted at https://github.com/Lullabot/tabled please go there instead.
+
 
 # Tabled
 A plugin designed to enhance the usability and responsiveness of HTML tables on an accessible way.
